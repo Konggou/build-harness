@@ -1,0 +1,28 @@
+Project: <project-name>
+Last Updated: <YYYY-MM-DD HH:MM TZ>
+Status: <planned|in_progress|blocked|validating|completed>
+
+Current Focus:
+- <one-line summary>
+
+Current Active Plan:
+- docs/exec-plans/active/<YYYY-MM-DD-topic>.md
+
+In Progress:
+- <item>
+
+Blocked:
+- <item or None>
+
+Next Actions:
+- <item>
+
+Recent Completions:
+- <item> -> docs/exec-plans/completed/<YYYY-MM-DD-topic>.md
+
+Key References:
+- docs/PRD.md
+- docs/APP_FLOW.md
+- docs/TECH_STACK.md
+- docs/DESIGN.md
+- docs/exec-plans/active/<YYYY-MM-DD-topic>.md

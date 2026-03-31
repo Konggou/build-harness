@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build Spec"
+  short_description: "Interrogate requirements and build a layered spec, design, and execution-memory system."
+  default_prompt: "Use $build-spec to inspect this project, ask blocking Planning-mode questions, and generate the layered spec, design-docs, exec-plans, progress.txt, and AGENTS.md structure."
