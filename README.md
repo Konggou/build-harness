@@ -1,10 +1,10 @@
-# Build Spec Skill
+# Build Spec
 
 English is the default language for this repository. A Chinese version is included below.
 
 ## Overview
 
-`build-spec` is a Codex skill for turning an empty project or an existing repository into a layered documentation system before implementation work continues.
+`build-spec` is a skill for turning an empty project or an existing repository into a layered documentation system before implementation work continues.
 
 It is designed to:
 
@@ -39,7 +39,7 @@ Detailed execution memory:
 
 - Strong trigger phrases include `构建文档索引` and `构建spec`
 - Empty projects are interrogated from first principles before any implementation decisions are documented
-- Existing projects are inspected first so the skill does not ask for facts the repo already answers
+- Existing projects are inspected first so the skill does not ask for facts the repository already answers
 - `progress.txt` stays short and points to the active execution plan
 - Detailed implementation history stays in `docs/exec-plans/`
 - `DESIGN.md` stays short and points to detailed frontend and backend design docs
@@ -50,24 +50,23 @@ Detailed execution memory:
 ```text
 .
 ├── README.md
-└── build-spec/
-    ├── SKILL.md
-    ├── agents/
-    │   └── openai.yaml
-    └── references/
-        ├── doc-set.md
-        ├── inspection-checklist.md
-        ├── examples/
-        └── templates/
+├── SKILL.md
+├── agents/
+│   └── openai.yaml
+└── references/
+    ├── doc-set.md
+    ├── inspection-checklist.md
+    ├── examples/
+    └── templates/
 ```
 
 ## Install
 
-To install manually into Codex global skills:
+To install manually into the global skill directory:
 
-1. Copy the `build-spec/` directory into `C:\Users\user\.codex\skills\build-spec`
+1. Copy this repository directory into `C:\Users\user\.codex\skills\build-spec`
 2. Ensure the installed folder contains `SKILL.md`, `agents/openai.yaml`, and `references/`
-3. Restart the relevant Codex session if the skill list is cached
+3. Restart the relevant session if the skill list is cached
 
 ## Usage
 
@@ -79,7 +78,7 @@ Example prompts:
 
 ## Validation
 
-This repository was validated with the `skill-creator` validator:
+This repository can be validated with the `skill-creator` validator:
 
 ```powershell
 python "C:\Users\user\.codex\skills\.system\skill-creator\scripts\quick_validate.py" "<path-to-build-spec>"
@@ -91,7 +90,7 @@ python "C:\Users\user\.codex\skills\.system\skill-creator\scripts\quick_validate
 
 ## 概述
 
-`build-spec` 是一个 Codex skill，用来在继续实现之前，把空项目或已有项目整理成一套分层的文档系统。
+`build-spec` 是一个 skill，用来在继续实现之前，把空项目或已有项目整理成一套分层的文档系统。
 
 它会：
 
@@ -126,7 +125,7 @@ python "C:\Users\user\.codex\skills\.system\skill-creator\scripts\quick_validate
 
 - 强触发词包括 `构建文档索引` 和 `构建spec`
 - 对空项目会先从第一性原理追问，再生成文档
-- 对已有项目会先读代码和结构，避免重复向用户问 repo 已经能回答的问题
+- 对已有项目会先读代码和结构，避免重复向用户问仓库已经能回答的问题
 - `progress.txt` 保持轻量，只记录当前状态并指向 active exec-plan
 - 详细实现历史保留在 `docs/exec-plans/`
 - `DESIGN.md` 保持精简，只负责索引详细前后端设计
@@ -134,8 +133,8 @@ python "C:\Users\user\.codex\skills\.system\skill-creator\scripts\quick_validate
 
 ## 安装
 
-手动安装到 Codex 全局 skill 目录：
+手动安装到全局 skill 目录：
 
-1. 把 `build-spec/` 复制到 `C:\Users\user\.codex\skills\build-spec`
+1. 把当前仓库目录复制到 `C:\Users\user\.codex\skills\build-spec`
 2. 确认目录中包含 `SKILL.md`、`agents/openai.yaml` 和 `references/`
-3. 如果 Codex 缓存了 skill 列表，重开相关会话
+3. 如果会话缓存了 skill 列表，重开相关会话
