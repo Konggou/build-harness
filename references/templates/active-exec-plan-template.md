@@ -2,7 +2,7 @@
 
 Last Updated: <YYYY-MM-DD HH:MM TZ>
 Status: <planned|in_progress|blocked|validating>
-Related IDs: <F-1, FLOW-1>
+Related IDs: <F-1 or task ID, optional>
 
 ## Goal
 
@@ -22,6 +22,10 @@ Related IDs: <F-1, FLOW-1>
 ## Verification Performed
 
 - <command, check, or observation>
+
+## Harness Updates Needed
+
+- <AGENTS/dev-map/harness/progress/skill/rule update or None>
 
 ## Known Issues
 

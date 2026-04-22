@@ -1,156 +1,185 @@
-# Document Set Contract
+# Minimal Harness Document Contract
 
-Use this contract to keep the generated files specific, complete, and mutually consistent.
+Use this contract to keep the generated Harness small, specific, and mutually consistent.
 
-## `PRD.md`
+## Default Outputs
 
-Must define:
-- product summary
-- target users and audience segments
-- problems solved
-- goals and success metrics
-- in-scope features
-- explicit out-of-scope items
-- non-goals
-- user stories
-- feature-by-feature acceptance criteria
+### `CLAUDE.md` (Claude Code) or `AGENTS.md` (Codex)
 
-Assign feature IDs such as `F-1`, `F-2` so other docs can reference them.
+Generate the file appropriate for the detected AI tool:
+- Claude Code → `CLAUDE.md` at the project root. Can import an existing `AGENTS.md` with `@AGENTS.md`.
+- Codex → `AGENTS.md` at the project root.
 
-## `APP_FLOW.md`
+Both must define:
 
-Write in plain English.
+- project purpose and stack summary
+- required recovery order
+- required verification entrypoint
+- basic behavior rules and prohibited behaviors
+- pointers to `progress.txt`, `docs/dev-map.md`, `docs/harness.md`, `docs/DESIGN.md`, and `docs/PRD.md`
 
-Must define:
-- screen or route inventory
-- entry points into each flow
-- step-by-step user navigation
-- decision points
-- success outcomes
-- failure outcomes
-- state transitions and edge cases relevant to UX
+Claude Code `CLAUDE.md` must also point to:
+- `.claude/rules/*.md` for path-scoped rules when they exist
+- `.claude/skills/*/SKILL.md` for project skills when they exist
+- `.claude/agents/*/AGENT.md` for sub agents when they exist
 
-Assign flow IDs such as `FLOW-1`, `FLOW-2`.
+Codex `AGENTS.md` must also point to:
+- `.codex/rules/*.rules` for command rules when they exist
+- `.agents/skills/*/SKILL.md` for project skills when they exist
 
-Adapt for non-web apps by replacing routes/pages with the appropriate interaction unit.
+Do not duplicate full architecture, full workflow, or full skill bodies here.
 
-## `TECH_STACK.md`
-
-Must define:
-- exact runtime/framework choices
-- exact package and dependency versions
-- APIs, SDKs, tools, infra, hosting, storage, and CI choices
-- integration boundaries
-
-Do not leave version choices vague.
-
-## `DESIGN.md`
-
-Must define:
-- architecture summary
-- frontend/backend boundaries
-- core modules and service relationships
-- major data and control flow
-- references to the detailed frontend and backend design docs
-
-Keep this file concise. It is the entry point into the deeper design documentation.
-Follow `references/templates/design-template.md` as the default structure.
-
-## `docs/design-docs/frontend/`
-
-Must contain detailed frontend design documents, such as:
-- UI architecture
-- routing and navigation
-- state management
-- component patterns
-- design system or visual rules
-
-For UI-light or non-web projects, adapt the contents to the relevant interaction surface.
-
-## `docs/design-docs/backend/`
-
-Must contain detailed backend design documents, such as:
-- service architecture
-- data model
-- auth and permissions
-- API contracts
-- jobs, storage, or integrations
-
-If the chosen stack relies on SQL schema design, include exact SQL structures in the relevant backend design document instead of leaving them implied.
-
-## `progress.txt`
+### `progress.txt`
 
 Must live at the project root.
 
 Must define:
+
+- project name
+- last updated timestamp
+- status
 - current focus
-- current active plan path under `docs/exec-plans/active/`
-- what is currently in progress
-- what is next
-- what is blocked, broken, or uncertain
+- current active plan path
+- in-progress items
+- blockers
+- next actions
 - recent completions
-- key references needed to resume work
+- key references
 
-Initialization rules:
-- Empty project: initialize from the confirmed planning answers and the newly generated spec set.
-- Existing project: initialize from actual repository state, existing docs, and the newly confirmed direction.
+Keep it concise. Detailed history belongs in `docs/exec-plans/`.
 
-Update rules:
-- Update after each meaningful completed feature or milestone.
-- Keep it concise enough for every new session to read first.
-- Do not use it as a long execution diary.
-- Prefer a stable, dashboard-like structure over accumulating narrative notes.
-- If it conflicts with the active exec-plan, repair it to match the active exec-plan and actual repo state.
+### `docs/PRD.md`
 
-## `docs/exec-plans/active/`
+Must define:
+
+- project summary
+- target users or consumers
+- problem and goals
+- in-scope features
+- explicit out-of-scope items
+- acceptance criteria
+
+Use lightweight feature IDs such as `F-1` when traceability helps. For existing projects, distinguish current state from target state.
+
+### `docs/DESIGN.md`
+
+Must define:
+
+- architecture summary
+- runtime, framework, language, and dependency choices
+- build/test/lint/CI commands when known
+- main modules and boundaries
+- data, API, storage, integration, packaging, or distribution boundaries as relevant
+- optional detailed design docs, if any
+
+This file replaces a default `TECH_STACK.md`. Do not split technology choices into a separate file unless the project already has one or complexity justifies it.
+
+### `docs/dev-map.md`
+
+Must define:
+
+- where to start reading the project
+- main directories and responsibilities
+- common change paths
+- risky or protected areas
+- existing patterns to follow
+- docs and skills relevant to common work
+
+Do not repeat full architecture prose from `docs/DESIGN.md`; make it an executable navigation map.
+
+### `docs/harness.md`
+
+Must define four sections:
+
+- `Workflow`: task phases, inputs, outputs, handoff rules, and rollback/stop conditions
+- `Verification`: unified verification entrypoint, underlying commands, expected outputs, and known blockers
+- `Tool Adapters`: Codex `AGENTS.md`, `.codex/rules/*.rules`, `.agents/skills/*`, plus any other AI-tool mappings
+- `Extension Plan`: prioritized path from MVP Harness toward stronger scripts, skills, review agents, CI, dev-map maintenance, MCP, and delivery closure
+
+Do not store Rule bodies or Skill bodies here. Store mappings and rationale only.
+
+### `docs/exec-plans/active/`
 
 Must contain detailed execution plans that are currently active.
 
 Each active plan should capture:
+
 - task goal
 - scope boundaries
 - implementation steps
 - verification notes
-- known breakages or blockers
+- known blockers
 - immediate next actions
-- related feature and flow IDs
 
-`progress.txt` should point to the current authoritative active plan.
-If `progress.txt` disagrees with the active exec-plan, treat the active exec-plan as authoritative for the current execution thread.
-Use a stable filename such as `YYYY-MM-DD-<topic>.md`.
+`progress.txt` must point to the current authoritative active plan.
 
-## `docs/exec-plans/completed/`
+### `docs/exec-plans/completed/`
 
-Must contain archived execution plans for work that has been completed.
+Must contain archived execution plans for completed work.
 
 Use it for:
-- preserving detailed implementation history
-- retaining verification context
-- avoiding context bloat in `progress.txt`
 
-Use a stable filename such as `YYYY-MM-DD-<topic>.md`.
+- implementation history
+- verification context
+- remaining risks and follow-ups
 
-## `AGENTS.md`
+### `scripts/verify.sh` or `scripts/verify.ps1`
 
-Must define:
-- `progress.txt` as required external memory
-- a rule that every new AI session, every new terminal window, and every branch switch reads `progress.txt` first
-- a rule that the agent opens the active exec-plan referenced by `progress.txt` before implementation work
-- a rule that `progress.txt` is updated faithfully after each meaningful implementation step
-- a rule that detailed execution tracking belongs in `docs/exec-plans/`, not in `progress.txt`
-- a rule that `docs/DESIGN.md` is the design index and detailed design lives in `docs/design-docs/`
-- the explicit recovery order: `progress.txt` -> active exec-plan -> `docs/DESIGN.md` -> detailed design docs as needed
-- the conflict rules: repo state > memory files for current implementation truth, active exec-plan > `progress.txt` for current execution truth, latest user-confirmed intent > stale docs for target-state truth
+Must be the unified verification entrypoint.
+
+Rules:
+
+- Existing projects: wrap discovered lint/typecheck/test/build commands where possible.
+- Empty projects: create a safe placeholder only when no executable project exists yet.
+- If verification cannot be determined, fail with a clear message and document the blocker in `docs/harness.md`.
+- Compose the script from three layers: universal gates (build, tests, test-count regression, no secrets, no merge markers), stack-specific gates (derived from detected manifests and tooling), and project-specific gates (derived from business rules, forbidden patterns, and conventions found during inspection). See [verify-by-stack.md](verify-by-stack.md) for concrete gate lists.
+- After generating the script, record every gate name and its command in the Verification section of `docs/harness.md`.
+
+## Optional Outputs
+
+### `docs/APP_FLOW.md` or `docs/design-docs/app-flow.md`
+
+Create only for complex UI/product flows.
+
+Must define screens/routes/commands, entry points, decisions, success outcomes, and failure outcomes.
+
+### `docs/design-docs/*`
+
+Create only when detailed architecture cannot fit safely in `docs/DESIGN.md`.
+
+Use domain-specific files, not mandatory `frontend/` and `backend/` directories for every project.
+
+### `docs/task-board.md`
+
+Create only when the project needs a portfolio-level task board beyond `progress.txt` and exec-plans.
+
+### Rules
+
+- Claude Code: `.claude/rules/*.md` — create for path-scoped behavior rules or command guidance
+- Codex: `.codex/rules/*.rules` — create for command execution policy (prefixes, approvals, sandbox)
+
+Create only when behavior that belongs in the instruction file needs to be path-scoped or enforced as policy.
+
+### Project Skills
+
+- Claude Code: `.claude/skills/<skill-name>/SKILL.md`
+- Codex: `.agents/skills/<skill-name>/SKILL.md`
+
+Create only for real reusable procedures. Follow the skill-creator structure.
+
+### Sub Agents
+
+- Claude Code: `.claude/agents/<name>/AGENT.md`
+- Codex: `.agents/skills/<name>/SKILL.md` (used as agent definition)
+
+Create only when the user needs multi-role task separation. Read [references/sub-agents.md](sub-agents.md) before generating. Offer the compact set (3 agents) first; upgrade to full set (7 agents) when the project requires independent review gates.
 
 ## Consistency Rules
 
-- Every feature named in `PRD.md` must map to flows in `APP_FLOW.md`.
-- Every major flow must map to concrete implementation choices in `TECH_STACK.md` and the relevant backend design docs.
-- UI decisions in the frontend design docs must be compatible with the flows in `APP_FLOW.md`.
-- `DESIGN.md` must stay aligned with the detailed frontend and backend design docs.
-- The active exec-plan must implement contracts already defined in the spec and design docs.
-- `progress.txt` must reflect the current state implied by the active exec-plan and latest completed work.
-- The active exec-plan must expand the current work tracked by `progress.txt`.
-- `AGENTS.md` must point to these files instead of duplicating them.
-- Feature IDs, flow IDs, design docs, and exec-plans must form a traceable chain.
-- Current-state descriptions must match the repo; target-state descriptions must match the latest user-confirmed intent.
+- `CLAUDE.md` (Claude Code) or `AGENTS.md` (Codex/other) must point to the minimal Harness docs instead of duplicating them.
+- `docs/DESIGN.md` must include tech stack/runtime/CI facts unless an existing optional doc is deliberately retained.
+- `docs/dev-map.md` must match actual repo paths.
+- `docs/harness.md` must not claim Rule/Skill bodies live under `docs/harness/`.
+- `progress.txt` must reflect the active exec-plan and actual repo state.
+- Existing optional docs may remain, but the Harness should reference them and avoid duplicating their content.
+- Current-state descriptions must match the repo; target-state descriptions must match latest user-confirmed intent.

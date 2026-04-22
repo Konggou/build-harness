@@ -4,26 +4,29 @@ Last Updated: <YYYY-MM-DD HH:MM TZ>
 
 ## System Summary
 
-<Brief architecture overview>
+<Concise architecture overview.>
 
-## Frontend Boundaries
+## Technology and Runtime
 
-- <boundary>
+- Language/runtime: <exact choice if known>
+- Frameworks/libraries: <exact choice if known>
+- Package/build tools: <exact choice if known>
+- CI/delivery: <known pipeline or "Not configured yet">
 
-## Backend Boundaries
+## Module Boundaries
 
-- <boundary>
+- <module/path>: <responsibility>
 
-## Shared Contracts
+## Data and Integration Boundaries
 
-- <API, schema, event, or auth boundary>
+- <API, schema, storage, auth, device, packaging, or external integration boundary>
 
-## Design Doc Index
+## Verification Commands
 
-### Frontend
+- Unified entrypoint: `scripts/verify.<sh|ps1>`
+- Underlying commands:
+  - <lint/typecheck/test/build command or TODO>
 
-- docs/design-docs/frontend/<file>.md
+## Detailed Design Index
 
-### Backend
-
-- docs/design-docs/backend/<file>.md
+- <optional detailed design doc path or "None by default">

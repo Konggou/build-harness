@@ -2,7 +2,7 @@
 
 Completed On: <YYYY-MM-DD HH:MM TZ>
 Final Status: completed
-Related IDs: <F-1, FLOW-1>
+Related IDs: <F-1 or task ID, optional>
 
 ## Goal
 
@@ -15,6 +15,10 @@ Related IDs: <F-1, FLOW-1>
 ## Verification Summary
 
 - <check>
+
+## Harness Updates Completed
+
+- <AGENTS/dev-map/harness/progress/skill/rule update or None>
 
 ## Remaining Risks
 

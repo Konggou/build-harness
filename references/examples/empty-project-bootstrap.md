@@ -1,62 +1,130 @@
-# Empty Project Bootstrap Example
+# Empty Project Harness Bootstrap Example
 
 Use this as a shape reference for a brand-new project with no meaningful existing code.
 
-## Generated Structure
+## Step 0: Tool Detection
 
-- `docs/PRD.md`
-- `docs/APP_FLOW.md`
-- `docs/TECH_STACK.md`
-- `docs/DESIGN.md`
-- `docs/design-docs/frontend/ui-architecture.md`
-- `docs/design-docs/backend/service-architecture.md`
+No `.claude/` or `.codex/` directory is present in an empty project. Ask the user which AI tool to target before generating any files.
+
+Example question: "Which AI tool will work with this project — Claude Code or Codex (or another tool)?"
+
+## Default Generated Structure
+
+Paths vary by target AI tool:
+
+**Claude Code:**
+- `CLAUDE.md`
 - `progress.txt`
-- `docs/exec-plans/active/YYYY-MM-DD-bootstrap.md`
+- `docs/PRD.md`
+- `docs/DESIGN.md`
+- `docs/dev-map.md`
+- `docs/harness.md`
+- `docs/exec-plans/active/YYYY-MM-DD-bootstrap-harness.md`
 - `docs/exec-plans/completed/`
+- `scripts/verify.sh` or `scripts/verify.ps1`
+
+**Codex:**
 - `AGENTS.md`
+- `progress.txt`
+- `docs/PRD.md`
+- `docs/DESIGN.md`
+- `docs/dev-map.md`
+- `docs/harness.md`
+- `docs/exec-plans/active/YYYY-MM-DD-bootstrap-harness.md`
+- `docs/exec-plans/completed/`
+- `scripts/verify.sh` or `scripts/verify.ps1`
 
-## Example Skeletons
+## Questioning Focus
 
-### `PRD.md`
+Ask until these are explicit:
 
-- Product summary
-- Target audience
-- Goals and success metrics
-- Features:
-  - `F-1` onboarding
-  - `F-2` dashboard
-- Non-goals
+- which AI tool is targeted (Claude Code or Codex)
+- project goal and audience
+- initial feature scope
+- preferred stack and runtime
+- expected verification commands
+- first implementation milestone
+- whether complex UI flow docs are needed
+- whether any repeated workflow should become a project skill
+- whether multi-role sub agents are needed (offer compact set of 3 as default)
+- whether any command rules or path-scoped rules are needed
 
-### `APP_FLOW.md`
+## Verification Script
 
-- `FLOW-1` first-time sign-up
-- `FLOW-2` returning-user dashboard visit
+For an empty project where no build/test commands exist yet, generate a placeholder script:
 
-### `TECH_STACK.md`
+```bash
+#!/usr/bin/env bash
+echo "Verification not yet configured. Run the following to initialize:"
+echo "  <stack-specific init command>"
+exit 1
+```
 
-- Runtime/framework with exact version
-- Key dependencies with exact versions
-- Hosting/storage/auth choices
+Record the blocker in `docs/harness.md` under Verification → Known blockers.
 
-### `DESIGN.md`
+Once the stack is known (from user answers), pre-populate the script with the stack-appropriate gates from `references/verify-by-stack.md` even before code exists, so the AI knows what to run once the project is initialized.
 
-- System summary
-- Frontend boundaries
-- Backend boundaries
-- Design doc index
+## Example Output Shape
 
-### `progress.txt`
+### `CLAUDE.md` (Claude Code) or `AGENTS.md` (Codex)
 
-- Current focus: bootstrap implementation
-- Active plan: `docs/exec-plans/active/YYYY-MM-DD-bootstrap.md`
-- Next actions: initialize repo, create docs, confirm stack
+- Project purpose and stack summary
+- Recovery order: progress.txt → active exec-plan → dev-map → harness.md → DESIGN.md
+- Verification entrypoint: `scripts/verify.*`
+- Behavior rules and prohibited behaviors
+- Pointers to deeper docs
 
-### Active exec-plan
+### `docs/PRD.md`
 
-- Goal: establish initial project foundation
-- Related IDs: `F-1`, `FLOW-1`
-- Steps: scaffold, configure, verify
+- Summary
+- Users
+- Goals
+- Scope with `F-1`, `F-2`
+- Acceptance criteria
+- Current state: empty project
+- Target state: confirmed first milestone
+
+### `docs/DESIGN.md`
+
+- Runtime/framework
+- Module boundaries
+- Verification commands (or TODO with blocker reason)
+- Optional design docs: none by default
+
+### `docs/dev-map.md`
+
+- Start here
+- Planned project map
+- Common change paths
+- Protected areas
+
+### `docs/harness.md`
+
+- Workflow
+- Verification (gates list + known blockers)
+- Tool Adapters (Claude Code or Codex section, sub agents table if generated)
+- Extension Plan
+
+## Optional: Sub Agents
+
+If the user confirms sub agents are needed, generate the compact set (3 agents) by default:
+
+**Claude Code:**
+```
+.claude/agents/planner/AGENT.md
+.claude/agents/developer/AGENT.md
+.claude/agents/verifier/AGENT.md
+```
+
+**Codex:**
+```
+.agents/skills/planner/SKILL.md
+.agents/skills/developer/SKILL.md
+.agents/skills/verifier/SKILL.md
+```
+
+Use templates from `references/sub-agents.md`. Record the agent index in `docs/harness.md` Tool Adapters.
 
 ## Usage Note
 
-For empty projects, initialize the docs from confirmed planning answers, not assumptions.
+Do not generate optional docs just because templates exist. Add `APP_FLOW.md`, `task-board.md`, or detailed design docs only when the user confirms the complexity is real.

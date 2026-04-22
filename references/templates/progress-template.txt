@@ -22,7 +22,7 @@ Recent Completions:
 
 Key References:
 - docs/PRD.md
-- docs/APP_FLOW.md
-- docs/TECH_STACK.md
 - docs/DESIGN.md
+- docs/dev-map.md
+- docs/harness.md
 - docs/exec-plans/active/<YYYY-MM-DD-topic>.md

@@ -1,4 +1,4 @@
 interface:
-  display_name: "Build Spec"
-  short_description: "Interrogate requirements and build a layered spec, design, and execution-memory system."
-  default_prompt: "Use $build-spec to inspect this project, ask blocking Planning-mode questions, and generate the layered spec, design-docs, exec-plans, progress.txt, and AGENTS.md structure."
+  display_name: "Build Harness"
+  short_description: "Inspect a project and build a minimal AI Harness. Supports Claude Code (CLAUDE.md, .claude/agents/, .claude/rules/) and Codex (AGENTS.md, .agents/skills/, .codex/rules/). Generates specs, dev-map, tech-stack-aware verification script, workflow, and optionally sub agent pipelines."
+  default_prompt: "Use $build-harness to inspect this project, detect the target AI tool, ask blocking questions, and generate or refresh the minimal Harness: CLAUDE.md or AGENTS.md, progress.txt, docs/PRD.md, docs/DESIGN.md, docs/dev-map.md, docs/harness.md, exec-plans, and scripts/verify.*."

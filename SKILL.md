@@ -1,258 +1,318 @@
 ---
-name: build-spec
-description: Generate or refresh a decision-complete project spec set by interrogating requirements in Planning mode before implementation. Use when the user says `构建文档索引`, `构建spec`, asks to generate PRD/spec/planning documents, or wants an AI to inspect an empty or existing project, ask blocking product and architecture questions, then produce linked docs, initialize the `progress.txt` plus `docs/exec-plans/` memory system, and produce a concise root `AGENTS.md`.
+name: build-harness
+description: Build or refresh a minimal AI Harness for an empty or existing project. Supports Claude Code and Codex. Use when the user says `build harness`, `setup harness`, `init harness`, `构建harness`, `构建spec`, `构建文档索引`, or asks to set up AI agent workflows, project rules, verification scripts, sub agent pipelines, or a unified project knowledge layer.
 ---
 
-# Build Spec
+# Build Harness
 
-Use this skill to turn a project idea or an existing codebase into a linked, decision-complete documentation system.
+Use this skill to turn an empty project or an existing repository into a small, durable Harness that lets AI work with project context, rules, repeatable workflows, and verifiable outcomes.
+
+A Harness is not just documentation. It is the combination of spec knowledge, behavior rules, verification scripts, and optionally sub agent pipelines that makes AI output stable, correct, and maintainable across sessions.
 
 ## Core Rules
 
-- Detect project state before asking questions.
-- If the project is non-empty, inspect it first. Do not ask the user for facts that can be derived from the repo.
-- Stay in Planning mode until no high-impact unknowns remain.
-- Ask one material question at a time.
-- Block on unresolved product, UX, architecture, stack, or data decisions. Do not silently choose defaults for them.
-- Write docs only after the questioning loop has removed ambiguity or the user has explicitly confirmed a choice.
-- Default document language to English.
-- Keep `APP_FLOW.md` in plain English even if the conversation happens in another language.
-- Maintain a two-layer memory system: lightweight `progress.txt` plus detailed files under `docs/exec-plans/`.
+- Detect the target AI tool before generating any tool-specific files.
+- Inspect the target workspace before asking questions.
+- If the project is non-empty, do not ask for facts that can be derived from the repo.
+- Keep asking until high-impact product, architecture, verification, or AI-tooling decisions are explicit.
+- Default generated document language to the user's language unless the user requests otherwise.
+- Prefer the smallest usable Harness over a large documentation tree.
+- Preserve valid existing docs. Do not delete or rewrite existing docs blindly.
+- Treat Rule, Skill, and Sub Agent as AI-tool-specific assets, not generic `docs/harness/` documents.
+- For Claude Code:
+  - behavior and recovery instructions belong in root `CLAUDE.md`
+  - path-scoped rules belong in `.claude/rules/*.md`
+  - project skills belong in `.claude/skills/<skill-name>/`
+  - sub agents belong in `.claude/agents/<name>/AGENT.md`
+  - permissions belong in `.claude/settings.json`
+- For Codex:
+  - behavior and recovery instructions belong in root `AGENTS.md`
+  - command execution rules belong in `.codex/rules/*.rules`
+  - project skills belong in `.agents/skills/<skill-name>/`
+  - new skills must follow `$skill-creator` structure
+- Maintain a two-layer execution memory system: lightweight `progress.txt` plus detailed files under `docs/exec-plans/`.
+
+## Minimal Harness Outputs
+
+Generate or refresh these by default:
+
+- `CLAUDE.md` (Claude Code) or `AGENTS.md` (Codex)
+- `progress.txt`
+- `docs/PRD.md`
+- `docs/DESIGN.md`
+- `docs/dev-map.md`
+- `docs/harness.md`
+- `docs/exec-plans/active/`
+- `docs/exec-plans/completed/`
+- `scripts/verify.sh` or `scripts/verify.ps1`
+
+Generate these only when needed:
+
+- `docs/APP_FLOW.md` or `docs/design-docs/app-flow.md` for complex UI/product flows
+- `docs/design-docs/*` for complex architecture that needs detailed design files
+- `docs/task-board.md` for project-level task portfolio tracking beyond `progress.txt` and exec-plans
+- Claude Code: `.claude/rules/*.md` for path-scoped behavior rules; `.claude/settings.json` for permissions
+- Codex: `.codex/rules/*.rules` for command approval/sandbox rules
+- Claude Code skills: `.claude/skills/<name>/SKILL.md`; Codex skills: `.agents/skills/<name>/SKILL.md`
+- Claude Code sub agents: `.claude/agents/<name>/AGENT.md`; Codex sub agents: `.agents/skills/<name>/SKILL.md`
+
+Do not create these as default Harness documents:
+
+- `docs/TECH_STACK.md` — merge into `docs/DESIGN.md`
+- `docs/harness/rules.md` — Rule bodies belong in the AI instruction file or tool-specific rules paths
+- `docs/harness/skills.md` — Skill bodies belong in their tool-specific skill paths
 
 ## Workflow
+
+### 0. Detect AI Tool
+
+Read [references/inspection-checklist.md](references/inspection-checklist.md) for the detection rules.
+
+- `.claude/` present, `.codex/` absent → **Claude Code**
+- `.codex/` present, `.claude/` absent → **Codex**
+- Both present → ask the user which is the primary tool
+- Neither present → ask the user (offer Claude Code and Codex with a one-line description of each)
+
+Record the result as `[TARGET_TOOL]`. Every subsequent step that generates tool-specific files must use this value to choose paths and file formats.
 
 ### 1. Detect Project State
 
 Inspect the target workspace before asking questions.
 
-- Treat the project as empty when there are no meaningful source/config/doc files, only editor metadata, or only ignore files.
-- Treat the project as non-empty when there is code, manifests, routes, schemas, generated UI, or existing docs worth analyzing.
+- Treat the project as empty when it contains no meaningful source/config/doc files.
+- Treat the project as non-empty when it contains code, manifests, routes/screens/commands, schemas, CI, generated UI, existing docs, `AGENTS.md`, `progress.txt`, `.codex/rules/`, or `.agents/skills/`.
 - Read [references/inspection-checklist.md](references/inspection-checklist.md) for what to inspect.
 
 ### 2. Choose the Path
 
 If the project is empty:
-- Ask about the product idea from first principles.
-- Continue until product intent, audience, flows, stack, design system, backend model, and rollout sequence are all explicit.
-- Initialize `progress.txt` from the confirmed answers once the initial doc set is ready.
-- Initialize `docs/exec-plans/active/` and `docs/exec-plans/completed/` for future execution tracking.
+
+- Ask from first principles about product goal, audience, primary flows, stack, verification strategy, initial AI rules, and repeatable work that may need skills.
+- Generate only the minimal Harness outputs unless the user confirms optional docs are needed.
+- If code is not initialized yet, create a verification script that exits with a clear "not configured yet" message and records the needed commands in `docs/harness.md`.
 
 If the project is non-empty:
+
 - Summarize the current project shape from inspection.
-- Ask about intent, gaps, corrections, target audience, missing features, constraints, and planned direction.
-- Continue until the future-state spec is explicit and no high-impact assumption remains.
-- Initialize or refresh `progress.txt` from the actual current project state plus the newly confirmed direction.
-- Initialize or refresh `docs/exec-plans/active/` and `docs/exec-plans/completed/` so detailed execution state has a durable location.
+- Identify existing docs, duplicate docs, drifted docs, verification scripts, CI commands, Codex rules, and project skills.
+- Ask only about desired target state, missing requirements, business rules, verification gaps, or AI-tool preferences that cannot be inferred.
+- Preserve useful existing docs. Optional old docs such as `APP_FLOW.md`, `TECH_STACK.md`, `task-board.md`, or `docs/design-docs/*` may remain and be referenced from the new minimal Harness.
+- If duplicate or drifted docs exist, plan a gradual merge into `docs/PRD.md`, `docs/DESIGN.md`, `docs/dev-map.md`, or `docs/harness.md`.
 
 ### 3. Run the Questioning Loop
 
-Keep questioning in Planning mode.
+Keep questioning until you can state:
 
-- Prefer questions that remove ambiguity from public behavior, architecture, or data design.
-- Use concrete options when the tradeoff is obvious.
-- When the user answer creates a new dependency, ask the next question that resolves that dependency.
-- Do not stop because the current answer seems "good enough."
-- Do not generate documents while the plan still depends on hidden assumptions.
+- what the project is and who it is for
+- what is in scope and out of scope
+- what the current repo already contains
+- what the target Harness must enable
+- how implementation tasks should flow
+- how results are verified
+- which AI tool is targeted (`[TARGET_TOOL]`)
+- which rules are behavior instructions versus command execution policy
+- which repeatable procedures require real skills
+- whether multi-role sub agent separation is needed
 
-Before moving on, you must be able to state:
-- What is being built
-- Who it is for
-- What is in scope and out of scope
-- What every primary flow does
-- What stack and major dependencies will be used
-- What the design system rules are
-- How the backend and data contracts work
-- In what order the system will be built
+Do not generate docs while the Harness still depends on hidden assumptions.
 
-### 4. Generate or Update the Document Set
-
-Work under `docs/`. Create the directory if needed.
-
-Required top-level files:
-- `docs/PRD.md`
-- `docs/APP_FLOW.md`
-- `docs/TECH_STACK.md`
-- `docs/DESIGN.md`
-
-Required design directories:
-- `docs/design-docs/frontend/`
-- `docs/design-docs/backend/`
-
-Required root memory file:
-- `progress.txt`
-
-Required execution-memory directories:
-- `docs/exec-plans/active/`
-- `docs/exec-plans/completed/`
+### 4. Generate or Update the Harness
 
 Read [references/doc-set.md](references/doc-set.md) before writing.
 
-When the files already exist:
-- Merge carefully instead of rewriting blindly.
-- Preserve content that is still valid.
-- Rewrite sections that conflict with the newly confirmed decisions.
-- Remove contradictions across the set.
+#### Generate the Verification Script
 
-The files must cross-reference each other:
-- `PRD.md` defines what exists
-- `APP_FLOW.md` defines how users experience it
-- `TECH_STACK.md` defines what builds it
-- `DESIGN.md` defines system shape, frontend/backend boundaries, and points to the detailed design docs
-- `docs/design-docs/frontend/` stores detailed frontend design, UI rules, component/system patterns, and interaction design
-- `docs/design-docs/backend/` stores detailed backend design, data structures, auth rules, service boundaries, and API contracts
-- `progress.txt` records only the current global status, active plan pointers, recent completions, and next actions
-- `docs/exec-plans/active/` stores detailed plans for work that is currently being executed
-- `docs/exec-plans/completed/` stores archived plans for completed work
+Read [references/verify-by-stack.md](references/verify-by-stack.md) before writing `scripts/verify.*`.
 
-### 5. Initialize and Maintain `progress.txt`
+Build the script from three layers in order:
 
-Create or update `progress.txt` at the repo root as the lightweight control panel for the AI's external working memory.
+1. **Universal gates** — always include: build, tests pass, test count regression, no secrets, no merge markers, harness doc freshness.
+2. **Stack gates** — derive from detected manifests and tooling (e.g. `package.json` → Node.js gates, `.csproj` → .NET gates). Do not invent gates for stacks not present.
+3. **Project gates** — derive from evidence found during inspection: forbidden APIs listed in `AGENTS.md` or `.codex/rules/`, localization systems, state-file access policies, file-length limits, sync-required config copies, and similar business rules already encoded in the repo.
 
-Rules:
-- Treat it as mandatory, not optional.
-- If the project is empty, initialize it from the confirmed planning answers and the generated document set.
-- If the project is non-empty, initialize or refresh it from the actual current implementation state, existing docs, and newly confirmed direction.
-- Keep it short enough to read at the start of every session without polluting context.
-- Do not turn it into a long-running diary or full implementation log.
-- Follow the structure in [references/templates/progress-template.txt](references/templates/progress-template.txt).
-- Record only:
-  - current focus
-  - active plan file path
-  - in-progress items
-  - blockers
-  - next actions
-  - recent completions
-  - key reference files
-- Include `Last Updated` and a simple status field such as `planned`, `in_progress`, `blocked`, `validating`, or `completed`.
-- Push detailed execution notes into files under `docs/exec-plans/active/` or `docs/exec-plans/completed/`.
-- If `progress.txt` conflicts with the active exec-plan, treat the active exec-plan plus actual repo state as the source of truth, then repair `progress.txt`.
+If build or test commands cannot yet be inferred, write the script with a clear `echo "Not configured yet — run <command> to initialize"` and `exit 1` for each missing gate. Record the blocker in `docs/harness.md` under Verification.
 
-### 6. Initialize and Maintain `docs/exec-plans/`
+After generating the script, update the Verification section of `docs/harness.md` to list every gate name and the command it wraps.
 
-Use `docs/exec-plans/` for detailed execution memory.
+Use the default templates when creating new files:
+
+- Claude Code instruction file: [references/templates/claude-md-template.md](references/templates/claude-md-template.md)
+- Codex / other AI instruction file: [references/templates/agents-md-template.md](references/templates/agents-md-template.md)
+- [references/templates/prd-template.md](references/templates/prd-template.md)
+- [references/templates/design-template.md](references/templates/design-template.md)
+- [references/templates/dev-map-template.md](references/templates/dev-map-template.md)
+- [references/templates/harness-template.md](references/templates/harness-template.md)
+- [references/templates/progress-template.txt](references/templates/progress-template.txt)
+- [references/templates/active-exec-plan-template.md](references/templates/active-exec-plan-template.md)
+- [references/templates/completed-exec-plan-template.md](references/templates/completed-exec-plan-template.md)
+
+Use optional templates only when needed:
+
+- [references/templates/app-flow-template.md](references/templates/app-flow-template.md)
+- [references/templates/task-board-template.md](references/templates/task-board-template.md)
+- [references/templates/detailed-design-template.md](references/templates/detailed-design-template.md)
+
+### 5. Maintain `progress.txt` and Exec Plans
+
+Create or update `progress.txt` at the repo root as the lightweight control panel.
 
 Rules:
-- Create `docs/exec-plans/active/` for plans that are currently being implemented.
-- Create `docs/exec-plans/completed/` for plans that have been finished and archived.
-- Use stable filenames such as `YYYY-MM-DD-<topic>.md`.
-- Keep exactly one authoritative primary active plan unless the user explicitly wants parallel implementation tracks.
-- Each meaningful implementation track should have its own plan file instead of overloading `progress.txt`.
-- `progress.txt` must point to the currently authoritative active plan file.
-- When a task is complete, move or rewrite its plan into `completed/` and update `progress.txt`.
-- Detailed logs, verification notes, breakages, and implementation history belong in the plan file, not in `progress.txt`.
-- Follow the structure in [references/templates/active-exec-plan-template.md](references/templates/active-exec-plan-template.md) for active plans.
-- Follow the structure in [references/templates/completed-exec-plan-template.md](references/templates/completed-exec-plan-template.md) for completed plans.
 
-### 6.5 Resolve Memory Conflicts
+- Keep it short enough for every new session to read first.
+- Record only current focus, active plan path, in-progress items, blockers, next actions, recent completions, and key references.
+- Detailed implementation notes belong in `docs/exec-plans/active/` or `docs/exec-plans/completed/`.
+- If `progress.txt` conflicts with an active exec-plan, trust the active exec-plan for current execution and actual repo state for implemented truth, then repair `progress.txt`.
+- Keep exactly one authoritative active plan unless the user explicitly wants parallel tracks.
 
-When `progress.txt`, an active exec-plan, and the repo disagree:
+### 6. Create or Refresh the AI Instruction File
 
-- Trust actual repo state over both documents for what is already implemented.
-- Trust the active exec-plan over `progress.txt` for the current execution thread.
-- Repair `progress.txt` after resolving the conflict.
-- If both memory files are stale or contradictory, rebuild the current state from the repo and the most recent verified notes.
+Generate the instruction file appropriate for `[TARGET_TOOL]`:
 
-### 7. Initialize and Maintain `docs/design-docs/`
+- **Claude Code** → root `CLAUDE.md`. If an `AGENTS.md` already exists and is valid, import it with `@AGENTS.md` rather than duplicating its content.
+- **Codex** → root `AGENTS.md`.
 
-Use `docs/design-docs/` for detailed design memory.
+Both must:
 
-Rules:
-- Create `docs/design-docs/frontend/` for detailed frontend design documents.
-- Create `docs/design-docs/backend/` for detailed backend design documents.
-- Use stable filenames such as `<topic>.md` or `<domain>-<topic>.md`.
-- Keep `docs/DESIGN.md` as the concise architectural index, not the full body of every design decision.
-- Push detailed frontend design into the frontend directory instead of creating a top-level `FRONTEND_GUIDELINES.md`.
-- Push detailed backend design into the backend directory instead of creating a top-level `BACKEND_STRUCTURE.md`.
-- Do not create a top-level `IMPLEMENTATION_PLAN.md`; execution planning belongs in `docs/exec-plans/`.
-- Make `docs/DESIGN.md` explicitly point to the relevant detailed design files.
-- Follow the structure in [references/templates/design-template.md](references/templates/design-template.md) for `docs/DESIGN.md`.
+- Be treated as the AI entrypoint and table of contents, not a full manual.
+- Include project purpose, stack summary, recovery order, required verification, behavior rules, prohibited behaviors, and links to deeper docs.
+- Instruct new AI sessions, new terminal sessions, and branch switches to read `progress.txt` first.
+- Instruct agents to open the active exec-plan referenced by `progress.txt` before implementation decisions.
+- Use this recovery order:
+  1. `progress.txt`
+  2. active exec-plan referenced there
+  3. `docs/dev-map.md`
+  4. `docs/harness.md`
+  5. `docs/DESIGN.md` and `docs/PRD.md` as needed
 
-### 7.5 Resolve Intent and Documentation Conflicts
+Claude Code `CLAUDE.md` must also point to:
+- `.claude/rules/*.md` when path-scoped rules exist
+- `.claude/skills/*/SKILL.md` when project skills exist
+- `.claude/agents/*/AGENT.md` when sub agents exist
 
-When user intent, repo state, and existing docs disagree:
+Codex `AGENTS.md` must also point to:
+- `.codex/rules/*.rules` when command rules exist
+- `.agents/skills/*/SKILL.md` when project skills exist
 
-- The latest user-confirmed intent is the source of truth for the desired future state.
-- Actual repo state is the source of truth for the current implemented state.
-- Existing docs are subordinate to both and must be repaired when they drift.
-- Do not silently overwrite the distinction between current state and target state. Make the delta explicit in the generated docs and plans.
+### 7. Handle Rules and Skills
 
-### 8. Create or Replace `AGENTS.md`
+Rules by tool:
 
-Generate a concise project map at the repo root.
+| Purpose | Claude Code | Codex |
+|---|---|---|
+| Behavior instructions | `CLAUDE.md` | `AGENTS.md` |
+| Path-scoped / command rules | `.claude/rules/*.md` | `.codex/rules/*.rules` |
+| Permissions (enforced) | `.claude/settings.json` | no direct equivalent |
 
-Rules:
-- Keep it around 100 lines.
-- Treat it as a table of contents, not a full reference manual.
-- Include project purpose, stack summary, naming conventions, component/service patterns, design-token pointers, allowed behaviors, prohibited behaviors, and links to deeper docs.
-- Explicitly instruct every new AI session, every new terminal session, and every branch switch to read `progress.txt` first for continuity.
-- Explicitly instruct the agent to open the active exec-plan referenced by `progress.txt` before making execution decisions.
-- Encode the recovery order explicitly:
-  1. Read `progress.txt`
-  2. Open the active exec-plan referenced there
-  3. Open `docs/DESIGN.md`
-  4. Open detailed design docs only if needed
-- Explain that `progress.txt` must stay lightweight and that detailed implementation tracking belongs in `docs/exec-plans/`.
-- Point to `docs/DESIGN.md` for architecture overview and `docs/design-docs/` for detailed frontend/backend design.
-- Point to the generated docs instead of duplicating them.
+- Record the mapping and reload notes in the Tool Adapters section of `docs/harness.md`.
+- Do not store Rule bodies in `docs/harness/rules.md`.
 
-### 9. Validate the Result
+Skills by tool:
+
+| Tool | Path |
+|---|---|
+| Claude Code | `.claude/skills/<skill-name>/SKILL.md` |
+| Codex | `.agents/skills/<skill-name>/SKILL.md` |
+
+- Each skill must contain a `SKILL.md` and may contain `references/`, `scripts/`, or `agents/openai.yaml`.
+- When creating or updating a Codex skill, load and follow `$skill-creator`.
+- Do not summarize skills as a single `docs/harness/skills.md` file.
+- Record the skill index and intended triggers in the Tool Adapters section of `docs/harness.md`.
+
+### 7.5. Set Up Sub Agents (Optional)
+
+Trigger this step when:
+- The user explicitly asks for multi-agent role separation, or
+- The project has long-running tasks where independent review is critical
+
+Steps:
+
+1. Read [references/sub-agents.md](references/sub-agents.md).
+2. Ask the user: compact set (3 agents: Planner, Developer, Verifier) or full set (7 agents)? Default to compact.
+3. Generate agent files in the path appropriate for `[TARGET_TOOL]`:
+   - Claude Code → `.claude/agents/<name>/AGENT.md`
+   - Codex → `.agents/skills/<name>/SKILL.md`
+4. Write each agent's role, inputs, outputs, handoff trigger, and return conditions using the templates in `references/sub-agents.md`.
+5. Update the Sub Agents section in `docs/harness.md` Tool Adapters with a table of all agents and their triggers.
+
+### 8. Validate the Result
 
 Before finishing:
-- Check that every required document exists.
-- Check that `progress.txt` exists and reflects the current state.
-- Check that `docs/exec-plans/active/` and `docs/exec-plans/completed/` exist.
-- Check that `docs/design-docs/frontend/` and `docs/design-docs/backend/` exist.
-- Check that no document contradicts another.
-- Check that `APP_FLOW.md` is plain English.
-- Check that versions in `TECH_STACK.md` are explicit, not implied.
-- Check that `AGENTS.md` is concise and points to deeper docs.
-- Check that `AGENTS.md` tells future sessions to read `progress.txt` first and then the referenced active exec-plan.
-- Check that `docs/DESIGN.md` points to the correct detailed design docs.
-- Check that the generated docs use stable IDs for tracing requirements, flows, and execution work.
-- Check that conflict resolution rules are respected when memory files, docs, and repo state disagree.
-- If the project type is not a web app, confirm the documents were adapted rather than forced into a web-only shape.
 
-## Non-Web Adaptation
+- Check that the minimal Harness outputs exist.
+- Check that optional docs were only created when justified.
+- Check that `docs/DESIGN.md` contains tech stack/runtime/CI information instead of requiring a separate `TECH_STACK.md`.
+- Check that `docs/harness.md` includes Workflow, Verification, Tool Adapters, and Extension Plan sections.
+- Check that the AI instruction file (`CLAUDE.md` or `AGENTS.md`) is concise and points to deeper docs.
+- Check that `progress.txt` points to the active exec-plan.
+- Check that `scripts/verify.*` exists or the blocker is clearly documented.
+- Check that rules, skills, and sub agents (if any) live in the correct tool-specific paths for `[TARGET_TOOL]`.
+- If existing optional docs remain, check that they are referenced rather than duplicated.
+- If sub agents were created, check that `docs/harness.md` Tool Adapters lists all agents with their triggers.
 
-The six-file structure stays the same for non-web apps, but the content must adapt.
+## Adaptation Rules
 
-Examples:
-- Desktop app: replace route inventory with windows, panels, menu flows, and local-service interactions.
-- Mobile app: replace route inventory with screens, navigation stacks, deep links, device permissions, and offline behavior.
-- CLI/tooling project: replace page flow with command flow, prompts, flags, configuration, and output/error paths.
+### AI Tool Paths
 
-Do not keep web-specific sections that do not apply. Replace them with the equivalent interaction and architecture details for the chosen app type.
+Always use `[TARGET_TOOL]` to select the correct paths:
+
+| Asset | Claude Code | Codex |
+|---|---|---|
+| Instruction file | `CLAUDE.md` | `AGENTS.md` |
+| Behavior rules (path-scoped) | `.claude/rules/*.md` | `.codex/rules/*.rules` |
+| Permissions | `.claude/settings.json` | no equivalent |
+| Project skills | `.claude/skills/<name>/SKILL.md` | `.agents/skills/<name>/SKILL.md` |
+| Sub agents | `.claude/agents/<name>/AGENT.md` | `.agents/skills/<name>/SKILL.md` |
+
+### Documentation Shape
+
+- Web apps may need optional `APP_FLOW.md` or detailed UI docs.
+- Desktop apps should describe windows, panels, menus, local services, and packaging instead of routes.
+- Mobile apps should describe screens, navigation stacks, permissions, offline behavior, and distribution.
+- CLI/tooling projects should describe commands, flags, config files, prompts, outputs, and error paths.
+- Libraries should describe public APIs, compatibility, examples, test matrix, and release process.
+
+### Verification Script Shape
+
+Use [references/verify-by-stack.md](references/verify-by-stack.md) for concrete gate lists. Summary per type:
+
+- **Web/Node.js/TS** — lint, typecheck, bundle, no `console.log` in prod, audit, env var completeness.
+- **Python** — ruff/flake8, mypy/pyright, pytest, no bare `except`, pinned deps.
+- **.NET/C#** — `dotnet build`, `dotnet test`, language version cap, no `MessageBox.Show`, no hardcoded UI strings, XAML encoding, `.csproj` completeness, `dotnet format`.
+- **Go** — build, test, vet, golangci-lint, `go mod tidy` diff-free.
+- **Rust** — build, test, clippy warnings-as-errors, fmt check, audit.
+- **Mobile iOS** — xcodebuild test, swiftlint, no force-unwrap in prod, no hardcoded URLs.
+- **Mobile Android** — gradle build/test, lint, no hardcoded strings, no committed secrets.
+- **CLI/Tooling** — build, test, `--help` exits 0, shellcheck, no hardcoded absolute paths.
+- **Library/SDK** — doc build, example compilation, public API surface audit.
+
+Always add project-specific gates when inspection reveals forbidden patterns, localization systems, shared config sync requirements, or other business rules encoded in `AGENTS.md` or `.codex/rules/`.
 
 ## Forward Testing
 
 Forward-test this skill when you revise it substantially.
 
 Use realistic prompts such as:
-- "Use $build-spec to interrogate this empty directory and prepare a full spec set for a new budgeting web app."
-- "Use $build-spec to inspect this existing repository, question me about missing intent, and refresh the linked spec docs."
+
+- "Use $build-harness on this empty project with no .claude/ or .codex/ directory." → should ask which AI tool to target
+- "Use $build-harness to inspect this existing repository that has a .claude/ directory." → should auto-detect Claude Code, generate CLAUDE.md
+- "Use $build-harness to inspect this existing repository that has a .codex/ directory." → should auto-detect Codex, generate AGENTS.md
+- "Use $build-harness to set up sub agents for this project." → should read sub-agents.md, ask compact vs full, generate agent files in tool-correct paths
+- "Use $build-harness to add project skills for repeated build and release workflows." → should generate skills in tool-correct paths
 
 Success criteria:
-- The agent inspects first when the repo is non-empty.
-- The agent keeps asking until the remaining unknowns are low impact.
-- The resulting doc set is specific, cross-linked, and decision-complete.
-- `progress.txt` is initialized and remains short enough for fast session startup.
-- `docs/DESIGN.md` stays concise while `docs/design-docs/` carries the detailed architecture and design.
-- `docs/exec-plans/` carries the detailed execution history without bloating `progress.txt`.
-- `AGENTS.md` stays concise.
 
-## Traceability IDs
-
-Use lightweight IDs so the documents can reference each other without ambiguity.
-
-- In `PRD.md`, assign feature IDs such as `F-1`, `F-2`.
-- In `APP_FLOW.md`, assign flow IDs such as `FLOW-1`, `FLOW-2`.
-- In `docs/design-docs/frontend/` and `docs/design-docs/backend/`, reference the relevant feature and flow IDs when describing architecture or contracts.
-- In `docs/exec-plans/active/`, reference the feature and flow IDs being implemented.
-- Use IDs to connect product requirements, flows, design decisions, and execution work.
+- AI tool is detected before any tool-specific files are generated.
+- Empty projects are questioned before docs are generated.
+- The default output does not create unnecessary docs.
+- Claude Code projects get `CLAUDE.md`, `.claude/rules/`, `.claude/agents/`, `.claude/skills/` as appropriate.
+- Codex projects get `AGENTS.md`, `.codex/rules/`, `.agents/skills/` as appropriate.
+- Sub agents use the compact set (3) by default; full set (7) only when requested.
+- `APP_FLOW.md`, `TECH_STACK.md`, `task-board.md`, and `docs/design-docs/*` remain optional.
+- `progress.txt` remains short and `docs/exec-plans/` carries detailed execution memory.
 
 ## Minimal Examples
 
-Use these examples as shape references when generating a first pass. Do not copy their domain content blindly.
+Use these examples as shape references. Do not copy their domain content blindly.
 
 - Empty-project bootstrap example: [references/examples/empty-project-bootstrap.md](references/examples/empty-project-bootstrap.md)
 - Existing-project refresh example: [references/examples/existing-project-refresh.md](references/examples/existing-project-refresh.md)

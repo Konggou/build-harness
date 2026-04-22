@@ -1,49 +1,45 @@
-# Build Spec
+# Build Harness
 
-English is the default language for this repository. A Chinese version is included below.
+English is the default README language for this repository. A Chinese version is included below.
 
 ## Overview
 
-`build-spec` is a skill for turning an empty project or an existing repository into a layered documentation system before implementation work continues.
+`build-harness` is a skill for **Claude Code** and **Codex** that turns an empty project or an existing repository into a minimal usable AI Harness.
 
-It is designed to:
+It detects which AI tool the project targets, preserves useful existing docs, asks only the questions that cannot be answered from the repo, and generates a small, durable document and tooling set that lets AI work with stable context, rules, repeatable workflows, and verifiable outcomes.
 
-- inspect the current project state first
-- ask blocking Planning-mode questions until high-impact unknowns are removed
-- generate a structured spec system under `docs/`
-- maintain lightweight and detailed execution memory through `progress.txt` and `docs/exec-plans/`
-- generate a concise `AGENTS.md` that tells future AI sessions how to recover context safely
+## What It Produces by Default
 
-## What It Produces
+| Output | Claude Code | Codex |
+|---|---|---|
+| AI instruction file | `CLAUDE.md` | `AGENTS.md` |
+| Execution memory | `progress.txt` | `progress.txt` |
+| Spec layer | `docs/PRD.md`, `docs/DESIGN.md` | same |
+| Navigation | `docs/dev-map.md` | same |
+| Harness entrypoint | `docs/harness.md` | same |
+| Execution plans | `docs/exec-plans/active/`, `docs/exec-plans/completed/` | same |
+| Verification | `scripts/verify.sh` or `scripts/verify.ps1` | same |
 
-Top-level outputs:
+Optional outputs (generated only when justified):
 
-- `docs/PRD.md`
-- `docs/APP_FLOW.md`
-- `docs/TECH_STACK.md`
-- `docs/DESIGN.md`
-- `progress.txt`
-- `AGENTS.md`
-
-Detailed design:
-
-- `docs/design-docs/frontend/`
-- `docs/design-docs/backend/`
-
-Detailed execution memory:
-
-- `docs/exec-plans/active/`
-- `docs/exec-plans/completed/`
+| Output | Claude Code | Codex |
+|---|---|---|
+| Complex UI flows | `docs/APP_FLOW.md` | same |
+| Detailed architecture | `docs/design-docs/*` | same |
+| Task portfolio | `docs/task-board.md` | same |
+| Path-scoped rules | `.claude/rules/*.md` | `.codex/rules/*.rules` |
+| Permissions | `.claude/settings.json` | — |
+| Project skills | `.claude/skills/<name>/SKILL.md` | `.agents/skills/<name>/SKILL.md` |
+| Sub agents | `.claude/agents/<name>/AGENT.md` | `.agents/skills/<name>/SKILL.md` |
 
 ## Key Behaviors
 
-- Strong trigger phrases include `构建文档索引` and `构建spec`
-- Empty projects are interrogated from first principles before any implementation decisions are documented
-- Existing projects are inspected first so the skill does not ask for facts the repository already answers
-- `progress.txt` stays short and points to the active execution plan
-- Detailed implementation history stays in `docs/exec-plans/`
-- `DESIGN.md` stays short and points to detailed frontend and backend design docs
-- Feature IDs and flow IDs are used to keep requirements, flows, design, and execution plans traceable
+- **Auto-detects AI tool**: `.claude/` → Claude Code; `.codex/` → Codex; both or neither → asks user
+- **Inspect-first**: reads repo structure before asking questions; does not ask for facts the repo can answer
+- **Tech-stack-aware verification**: generates `scripts/verify.*` with real gates derived from detected stack (build, lint, test, test-count regression, project-specific forbidden patterns)
+- **Sub agent support**: optionally generates a compact (3-agent) or full (7-agent) pipeline — Planner, Developer, Verifier or PM/Analyst/Designer/Gatekeeper/Developer/Reviewer/Tester
+- **Minimal by default**: does not generate `APP_FLOW.md`, `TECH_STACK.md`, `task-board.md`, or `design-docs/*` unless complexity justifies it
+- **Execution memory**: `progress.txt` stays short; detailed plans live in `docs/exec-plans/`
 
 ## Repository Layout
 
@@ -56,85 +52,133 @@ Detailed execution memory:
 └── references/
     ├── doc-set.md
     ├── inspection-checklist.md
+    ├── sub-agents.md
+    ├── verify-by-stack.md
     ├── examples/
+    │   ├── empty-project-bootstrap.md
+    │   └── existing-project-refresh.md
     └── templates/
+        ├── prd-template.md
+        ├── design-template.md
+        ├── dev-map-template.md
+        ├── harness-template.md
+        ├── claude-md-template.md
+        ├── agents-md-template.md
+        ├── progress-template.txt
+        ├── active-exec-plan-template.md
+        ├── completed-exec-plan-template.md
+        ├── app-flow-template.md
+        ├── task-board-template.md
+        └── detailed-design-template.md
 ```
 
 ## Install
 
-To install manually into the global skill directory:
+### Claude Code
 
-1. Copy this repository directory into `C:\Users\user\.codex\skills\build-spec`
-2. Ensure the installed folder contains `SKILL.md`, `agents/openai.yaml`, and `references/`
-3. Restart the relevant session if the skill list is cached
+Copy this repository into your Claude Code skills directory:
+
+```
+~/.claude/skills/build-harness/
+```
+
+Ensure the installed folder contains `SKILL.md`, `agents/openai.yaml`, and `references/`.
+
+### Codex
+
+Copy this repository into your Codex skills directory:
+
+```
+~/.codex/skills/build-harness/
+```
+
+Ensure the installed folder contains `SKILL.md`, `agents/openai.yaml`, and `references/`.
+
+Restart the relevant session if the skill list is cached.
 
 ## Usage
 
 Example prompts:
 
-- `Use $build-spec to inspect this project, ask blocking Planning-mode questions, and generate the layered spec system.`
-- `构建文档索引`
-- `构建spec`
+- `build harness` / `setup harness` / `init harness`
+- `Use $build-harness to inspect this project and build a minimal usable Harness.`
+- `构建harness` / `构建spec` / `构建文档索引`
 
 ## Validation
 
 This repository can be validated with the `skill-creator` validator:
 
 ```powershell
-python "C:\Users\user\.codex\skills\.system\skill-creator\scripts\quick_validate.py" "<path-to-build-spec>"
+python "<skill-creator-path>/scripts/quick_validate.py" "<path-to-build-harness>"
 ```
 
-## Chinese
+---
 
-以下是中文说明，英文仍然是默认版本。
+## 中文说明
 
 ## 概述
 
-`build-spec` 是一个 skill，用来在继续实现之前，把空项目或已有项目整理成一套分层的文档系统。
+`build-harness` 是一个同时支持 **Claude Code** 和 **Codex** 的 skill，用来把空项目或已有项目整理成一套最小可用 AI Harness。
 
-它会：
+它会自动检测目标 AI 工具，保留有价值的现有文档，只追问仓库无法回答的问题，并生成一套精简、持久的文档和工具集，让 AI 在稳定的上下文、规则、可复用工作流和可验证结果下工作。
 
-- 先检查当前项目状态
-- 在 Planning 模式下持续追问，直到高影响的不确定项被消除
-- 在 `docs/` 下生成结构化规格文档
-- 通过 `progress.txt` 和 `docs/exec-plans/` 维护轻量与详细两层执行记忆
-- 生成精简的 `AGENTS.md`，让后续 AI 会话能安全恢复上下文
+## 默认产物
 
-## 产物
+| 产物 | Claude Code | Codex |
+|---|---|---|
+| AI 指令文件 | `CLAUDE.md` | `AGENTS.md` |
+| 执行记忆 | `progress.txt` | `progress.txt` |
+| 规格层 | `docs/PRD.md`、`docs/DESIGN.md` | 同左 |
+| 导航地图 | `docs/dev-map.md` | 同左 |
+| Harness 入口 | `docs/harness.md` | 同左 |
+| 执行计划 | `docs/exec-plans/active/`、`docs/exec-plans/completed/` | 同左 |
+| 验证脚本 | `scripts/verify.sh` 或 `scripts/verify.ps1` | 同左 |
 
-顶层文档：
+按需生成（仅在有充分理由时才创建）：
 
-- `docs/PRD.md`
-- `docs/APP_FLOW.md`
-- `docs/TECH_STACK.md`
-- `docs/DESIGN.md`
-- `progress.txt`
-- `AGENTS.md`
-
-详细设计：
-
-- `docs/design-docs/frontend/`
-- `docs/design-docs/backend/`
-
-详细执行记忆：
-
-- `docs/exec-plans/active/`
-- `docs/exec-plans/completed/`
+| 产物 | Claude Code | Codex |
+|---|---|---|
+| 复杂 UI 流程 | `docs/APP_FLOW.md` | 同左 |
+| 详细架构设计 | `docs/design-docs/*` | 同左 |
+| 任务看板 | `docs/task-board.md` | 同左 |
+| 路径规则 | `.claude/rules/*.md` | `.codex/rules/*.rules` |
+| 权限控制 | `.claude/settings.json` | — |
+| 项目 Skills | `.claude/skills/<name>/SKILL.md` | `.agents/skills/<name>/SKILL.md` |
+| Sub Agents | `.claude/agents/<name>/AGENT.md` | `.agents/skills/<name>/SKILL.md` |
 
 ## 关键特性
 
-- 强触发词包括 `构建文档索引` 和 `构建spec`
-- 对空项目会先从第一性原理追问，再生成文档
-- 对已有项目会先读代码和结构，避免重复向用户问仓库已经能回答的问题
-- `progress.txt` 保持轻量，只记录当前状态并指向 active exec-plan
-- 详细实现历史保留在 `docs/exec-plans/`
-- `DESIGN.md` 保持精简，只负责索引详细前后端设计
-- 通过功能 ID 与流程 ID 保证需求、流程、设计、执行计划之间可追踪
+- **自动检测 AI 工具**：有 `.claude/` → Claude Code；有 `.codex/` → Codex；都有或都没有 → 询问用户
+- **先读代码再提问**：读取仓库结构后再追问，不问仓库已能回答的问题
+- **技术栈感知验证**：根据检测到的技术栈生成有实质内容的 `scripts/verify.*`（构建、lint、测试、测试数量回归、项目专属禁止模式）
+- **Sub Agent 支持**：可选择生成精简版（3个 agent）或完整版（7个 agent）的多角色流水线
+- **最小化原则**：不默认生成 `APP_FLOW.md`、`TECH_STACK.md`、`task-board.md` 或 `design-docs/*`
+- **两层执行记忆**：`progress.txt` 保持轻量，详细计划放在 `docs/exec-plans/`
 
 ## 安装
 
-手动安装到全局 skill 目录：
+### Claude Code
 
-1. 把当前仓库目录复制到 `C:\Users\user\.codex\skills\build-spec`
-2. 确认目录中包含 `SKILL.md`、`agents/openai.yaml` 和 `references/`
-3. 如果会话缓存了 skill 列表，重开相关会话
+将本仓库复制到 Claude Code skills 目录：
+
+```
+~/.claude/skills/build-harness/
+```
+
+### Codex
+
+将本仓库复制到 Codex skills 目录：
+
+```
+~/.codex/skills/build-harness/
+```
+
+确保安装目录包含 `SKILL.md`、`agents/openai.yaml` 和 `references/`。如果 skill 列表已缓存，请重启相关会话。
+
+## 使用方式
+
+示例触发词：
+
+- `build harness` / `setup harness` / `init harness`
+- `Use $build-harness to inspect this project and build a minimal usable Harness.`
+- `构建harness` / `构建spec` / `构建文档索引`
